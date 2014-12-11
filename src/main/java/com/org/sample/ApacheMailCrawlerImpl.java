@@ -9,51 +9,45 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import com.sample.builder.DocumentBuilder;
-import com.sample.extractor.MailContentExtractor;
-import com.sample.writer.WriterIntf;
+import com.sample.extractor.ApacheMailContentExtractor;
 import com.sample.writer.WriterFactory;
+import com.sample.writer.WriterIntf;
 
-/**
- * Hello world!
- *
- */
-public class SampleApacheMailCrawler {
-	public static void main(String[] args) throws IOException,
-			InterruptedException {
-		String domainURL = "http://mail-archives.apache.org/mod_mbox/maven-users/";
-		String destination = "File";
-		String destinationPath = "G://Assignments//2014//";
+public class ApacheMailCrawlerImpl {
+
+	public void mailCrawler(String urlString, String destination,
+			String destinationPath) throws InterruptedException, IOException {
 		HashSet<String> urlSet = new LinkedHashSet<String>();
-
-		Document doc = DocumentBuilder.buildDocument(domainURL);
-		// get all links and recursively call the processPage method
-		// System.out.println(doc.getElementsByClass("Contents").text());
-
+		Document doc = DocumentBuilder.buildDocument(urlString);
 		Elements links = doc.select("a[href]");
 		for (Element link : links) {
-			if (link.attr("href").contains("2014")) {
+			if (link.attr("href").contains("2014")
+					&& link.attr("href").contains(".mbox/thread")) {
+				System.out.println(link.attr("abs:href"));
 				urlSet.add(link.attr("abs:href"));
 			}
 		}
-		for (String urlString : urlSet) {
-			processURL(urlString, destination, destinationPath);
+		System.out.println(urlSet);
+		for (String urlStr : urlSet) {
+			System.out.println(urlStr);
+			Thread.sleep(2000);
+			processURL(urlStr, destination, destinationPath);
 		}
 
 		System.out.println(urlSet);
 	}
 
-	private static void processURL(String urlString, String destination,
+	public void processURL(String urlString, String destination,
 			String destinationPath) throws IOException, InterruptedException {
 		Document doc = DocumentBuilder.buildDocument(urlString);
 		Elements links = doc.select("a[href]");
-
 		for (Element link : links) {
 			if (link.attr("href").startsWith("%")) {
 				if (destination.equalsIgnoreCase("File")) {
 					WriterIntf writer = WriterFactory.getWriter(destination);
 					String newURLString = link.attr("abs:href");
 					doc = DocumentBuilder.buildDocument(newURLString);
-					String mailContent = MailContentExtractor
+					String mailContent = ApacheMailContentExtractor
 							.extractMailContents(doc);
 					String directoryName = newURLString.split("2014")[1];
 					String location = destinationPath
@@ -82,5 +76,4 @@ public class SampleApacheMailCrawler {
 	private static String formatString(String str) {
 		return str.replaceAll("[\"-+.^:,?<>@\\/]", "");
 	}
-
 }
