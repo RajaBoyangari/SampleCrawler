@@ -50,7 +50,7 @@ public class ApacheMailCrawlerImpl {
 					String mailContent = ApacheMailContentExtractor
 							.extractMailContents(doc);
 					String directoryName = newURLString.split("2014")[1];
-					String location = destinationPath
+					String location = destinationPath + "\\"
 							+ directoryName.substring(0, 5);
 					String fileName = getFileName(doc);
 					writer.writeMailContent(mailContent, location, fileName);
